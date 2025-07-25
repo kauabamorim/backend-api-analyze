@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id      String  @id @default(cuid())
+  email   String  @unique
+  name    String?
+  isOwner Boolean @default(false)
+
+  organization   Organization? @relation("OrganizationMembers", fields: [organizationId], references: [id])
+  organizationId String?
+
+  ownedOrganization Organization? @relation("OrganizationOwner")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Idea      Idea[]
+}
+
+model Organization {
+  id   String @id @default(cuid())
+  name String
+
+  plan    Plan @default(FREE)
+  credits Int  @default(5)
+
+  owner   User   @relation("OrganizationOwner", fields: [ownerId], references: [id])
+  ownerId String @unique
+
+  members User[] @relation("OrganizationMembers")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Idea {
+  id        String   @id @default(cuid())
+  content   String
+  feedback  Json?
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+}
+
+enum Plan {
+  FREE
+  STARTER
+  PRO
+  ENTERPRISE
+}
