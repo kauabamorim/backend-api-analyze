@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import express, { Request, Response } from "express";
 import analyzeRouter from "./routes/analyze";
+import userRoutes from "./routes/users";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -12,6 +13,7 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 
 app.use("/api/analyze", analyzeRouter);
+app.use("/users", userRoutes);
 
 app.listen(port, () => {
   console.log(
