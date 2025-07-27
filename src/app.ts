@@ -14,7 +14,7 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 
 app.use("/api/analyze", authenticateToken, analyzeRouter);
-app.use("/api/users", userRoutes);
+app.use("/api/user", userRoutes);
 
 app.listen(port, () => {
   console.log(
