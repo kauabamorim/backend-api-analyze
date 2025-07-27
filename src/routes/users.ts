@@ -9,7 +9,7 @@ const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || "";
 
 router.post("/register", async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, firstName, lastName } = req.body;
 
   if (!email || !password)
     return res.status(400).json({ error: "Email e senha são obrigatórios" });
@@ -29,17 +29,23 @@ router.post("/register", async (req, res) => {
       data: {
         email,
         password: hashedPassword,
+        name: `${firstName} ${lastName}` || email?.split("@")[0],
         createdAt: new Date(),
       },
       select: {
         id: true,
         plan: true,
+        name: true,
       },
     });
 
-    const token = jwt.sign({ userId: user.id, plan: user.plan }, JWT_SECRET, {
-      expiresIn: "1d",
-    });
+    const token = jwt.sign(
+      { userId: user.id, plan: user.plan, name: user.name },
+      JWT_SECRET,
+      {
+        expiresIn: "1d",
+      }
+    );
 
     res.status(201).json({ message: "Usuário criado com sucesso", token });
   } catch (error) {
@@ -62,9 +68,13 @@ router.post("/login", async (req, res) => {
     if (!passwordMatch)
       return res.status(401).json({ error: "Usuário ou senha inválidos" });
 
-    const token = jwt.sign({ userId: user.id, plan: user.plan }, JWT_SECRET, {
-      expiresIn: "1d",
-    });
+    const token = jwt.sign(
+      { userId: user.id, plan: user.plan, name: user.name },
+      JWT_SECRET,
+      {
+        expiresIn: "1d",
+      }
+    );
 
     res.json({ token });
   } catch {
