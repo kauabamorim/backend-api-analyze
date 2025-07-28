@@ -25,30 +25,18 @@ router.post("/register", async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await prisma.user.create({
+    await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         name: `${firstName} ${lastName}` || email?.split("@")[0],
         createdAt: new Date(),
       },
-      select: {
-        id: true,
-        plan: true,
-        name: true,
-      },
     });
 
-    const token = jwt.sign(
-      { userId: user.id, plan: user.plan, name: user.name },
-      JWT_SECRET,
-      {
-        expiresIn: "1d",
-      }
-    );
-
-    res.status(201).json({ message: "Usuário criado com sucesso", token });
+    res.status(201).json({ message: "Usuário criado com sucesso" });
   } catch (error) {
+    console.log("Erro ao criar usuário:", error);
     res.status(400).json({ error: "Erro ao criar usuário" });
   }
 });
