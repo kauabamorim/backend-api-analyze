@@ -2,17 +2,37 @@ import { Router } from "express";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { z } from "zod";
 
 const prisma = new PrismaClient();
 const router = Router();
 
 const JWT_SECRET = process.env.JWT_SECRET || "";
 
-router.post("/register", async (req, res) => {
-  const { email, password, firstName, lastName } = req.body;
+const registerSchema = z.object({
+  email: z.string().email("Email inválido."),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres."),
+  firstName: z.string().min(1, "O primeiro nome é obrigatório."),
+  lastName: z.string().min(1, "O sobrenome é obrigatório."),
+});
 
-  if (!email || !password)
-    return res.status(400).json({ error: "Email e senha são obrigatórios." });
+const loginSchema = z.object({
+  email: z.string().email("Email inválido."),
+  password: z.string().min(1, "A senha é obrigatória."),
+});
+
+router.post("/register", async (req, res) => {
+  const parseResult = registerSchema.safeParse(req.body);
+
+  if (!parseResult.success) {
+    return res
+      .status(400)
+      .json({ error: "Dados inválidos.", issues: parseResult.error.errors });
+  }
+
+  const { email, password, firstName, lastName } = parseResult.data;
+
+  const name = `${firstName} ${lastName}`;
 
   const checkExistUser = await prisma.user.findUnique({
     where: { email },
@@ -29,45 +49,51 @@ router.post("/register", async (req, res) => {
       data: {
         email,
         password: hashedPassword,
-        name: `${firstName} ${lastName}` || email?.split("@")[0],
-        createdAt: new Date(),
+        name,
       },
     });
 
-    res.status(201).json({ message: "Usuário criado com sucesso" });
+    res.status(201).json({ message: "Usuário registrado com sucesso." });
   } catch (error) {
-    console.log("Erro ao criar usuário:", error);
-    res.status(400).json({ error: "Erro ao criar usuário" });
+    console.error("Erro ao registrar usuário:", error);
+    res.status(500).json({ error: "Erro ao registrar usuário." });
   }
 });
 
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  const parseResult = loginSchema.safeParse(req.body);
 
-  if (!email || !password)
-    return res.status(400).json({ error: "Email e senha são obrigatórios." });
+  if (!parseResult.success) {
+    return res
+      .status(400)
+      .json({ error: "Dados inválidos.", issues: parseResult.error.errors });
+  }
+
+  const { email, password } = parseResult.data;
 
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user)
-      return res.status(401).json({ error: "Email ou senha inválidos." });
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
 
-    const passwordMatch = await bcrypt.compare(password, user.password);
-    if (!passwordMatch)
-      return res.status(401).json({ error: "Email ou senha inválidos." });
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
 
-    const token = jwt.sign(
-      { userId: user.id, plan: user.plan, name: user.name },
-      JWT_SECRET,
-      {
-        expiresIn: "1d",
-      }
-    );
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Credenciais inválidas." });
+    }
+
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
     res.json({ token });
   } catch (error) {
-    console.log("Error route login:", error);
-    res.status(500).json({ error: "Erro no servidor" });
+    console.error("Erro ao fazer login:", error);
+    res.status(500).json({ error: "Erro ao fazer login." });
   }
 });
 

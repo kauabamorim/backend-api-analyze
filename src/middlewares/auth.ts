@@ -1,7 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-
+import { z } from "zod";
 const JWT_SECRET = process.env.JWT_SECRET || "";
+
+const JwtPayloadSchema = z.object({
+  id: z.string(),
+  email: z.string().email(),
+});
 
 export function authenticateToken(
   req: Request,
@@ -15,8 +20,15 @@ export function authenticateToken(
 
   jwt.verify(token, JWT_SECRET, (err, payload) => {
     if (err) return res.status(403).json({ error: "Token inválido" });
+    const result = JwtPayloadSchema.safeParse(payload);
 
-    (req as any).user = payload;
+    if (!result.success) {
+      return res
+        .status(400)
+        .json({ error: "Payload inválido", issues: result.error.errors });
+    }
+
+    (req as any).user = result.data;
     next();
   });
 }
