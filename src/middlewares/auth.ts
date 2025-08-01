@@ -6,6 +6,8 @@ const JWT_SECRET = process.env.JWT_SECRET || "";
 const JwtPayloadSchema = z.object({
   id: z.string(),
   email: z.string().email(),
+  plan: z.string(),
+  name: z.string(),
 });
 
 export function authenticateToken(
