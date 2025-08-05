@@ -47,12 +47,22 @@ router.post("/", async (req, res) => {
       return res.status(404).json({ error: "Usuário não encontrado." });
     }
 
-    const ideaCount = await prisma.idea.count({
-      where: { userId: user.id },
-    });
-
     const userPlan = user.plan || Plan.FREE;
     const allowed = limits[userPlan];
+
+    const whereCondition: any = {
+      userId: user.id,
+    };
+
+    if (userPlan !== "FREE") {
+      whereCondition.createdAt = {
+        gte: new Date(new Date().setMonth(new Date().getMonth() - 1)),
+      };
+    }
+
+    const ideaCount = await prisma.idea.count({
+      where: whereCondition,
+    });
 
     if (ideaCount >= allowed) {
       return res
