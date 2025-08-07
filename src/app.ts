@@ -8,9 +8,9 @@ import cors from "cors";
 const app = express();
 const port = process.env.PORT || 3000;
 
-// app.get("/", (req: Request, res: Response) => {
-//   res.send("Hello from Express with TypeScript!");
-// });
+app.get("/", (req: Request, res: Response) => {
+  res.send("Testing EC2 API");
+});
 
 app.use(
   cors({
