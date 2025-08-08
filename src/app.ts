@@ -6,7 +6,7 @@ import { authenticateToken } from "./middlewares/auth";
 import cors from "cors";
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = parseInt(process.env.PORT || "3000", 10);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Testing EC2 API");
@@ -25,8 +25,6 @@ app.use(express.json());
 app.use("/api/analyze", authenticateToken, analyzeRouter);
 app.use("/api/user", userRoutes);
 
-app.listen(port, () => {
-  console.log(
-    chalk.yellowBright(`Server is running on http://localhost:${port}`)
-  );
+app.listen(port, "0.0.0.0", () => {
+  console.log(`Servidor rodando em http://0.0.0.0:${port}`);
 });
