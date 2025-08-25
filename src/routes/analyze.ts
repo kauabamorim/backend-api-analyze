@@ -103,6 +103,7 @@ router.post("/", async (req, res) => {
   } catch (error) {
     console.error("Error analyzing idea:", error);
     if (ideaId) {
+      console.log("Setting idea status to ERROR for ideaId:", ideaId);
       await prisma.idea.update({
         where: { id: ideaId },
         data: {
