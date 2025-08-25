@@ -1,4 +1,5 @@
 export interface AnalyzeIdea {
+  author: string;
   id: string;
   viability: string;
   marketPotential: string;
@@ -6,10 +7,12 @@ export interface AnalyzeIdea {
   challenges: string;
   suggestions: string;
   idea: string;
+  status: string;
 }
 
 export const analyzeIdeasMap = (data: any): AnalyzeIdea => {
   return {
+    author: data.author,
     id: data.id,
     viability: data.viability,
     marketPotential: data.marketPotential,
@@ -17,5 +20,6 @@ export const analyzeIdeasMap = (data: any): AnalyzeIdea => {
     challenges: data.challenges,
     suggestions: data.suggestions,
     idea: data.idea,
+    status: data.status,
   };
 };

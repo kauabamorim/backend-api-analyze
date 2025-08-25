@@ -10,7 +10,7 @@ datasource db {
 model User {
   id       String  @id @default(cuid())
   email    String  @unique
-  name     String?
+  name     String
   password String
   isOwner  Boolean @default(false)
   plan     Plan    @default(FREE)
@@ -44,6 +44,7 @@ model Organization {
 
 model Idea {
   id              String  @id @default(cuid())
+  author          String
   viability       String? @db.Text
   marketPotential String? @db.Text
   innovation      String? @db.Text

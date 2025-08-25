@@ -71,19 +71,21 @@ router.post("/", async (req, res) => {
         .json({ error: "Limite de ideias atingido para seu plano." });
     }
 
-    const analysis = await analyzeIdeaWithAI(idea);
-    if (!analysis) {
-      return res.status(500).json({ error: "Falha ao analisar a ideia." });
-    }
-
     const createdIdea = await prisma.idea.create({
       data: {
+        author: user.name,
         idea,
         userId: user.id,
       },
     });
 
     ideaId = createdIdea.id;
+
+    const analysis = await analyzeIdeaWithAI(idea);
+
+    if (!analysis) {
+      return res.status(500).json({ error: "Falha ao analisar a ideia." });
+    }
 
     const mappedAnalysis = analizeMap(analysis);
 
