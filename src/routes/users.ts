@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
+import { analyzeIdeasMap } from "../mappers/analyzeIdeasMapper";
 
 const prisma = new PrismaClient();
 const router = Router();
@@ -98,6 +99,31 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     console.error("Erro ao fazer login:", error);
     res.status(500).json({ error: "Erro ao fazer login." });
+  }
+});
+
+router.get("/history", async (req, res) => {
+  const userId = req.user?.id;
+
+  if (!userId) {
+    return res.status(401).json({ error: "Usuário não autenticado." });
+  }
+
+  try {
+    const ideas = await prisma.idea.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const mappedIdeas = ideas.map((idea) => {
+      return analyzeIdeasMap(idea);
+    });
+
+    console.log(`userId ${userId} History Length: `, mappedIdeas.length);
+    res.json(mappedIdeas);
+  } catch (error) {
+    console.error("Erro ao buscar histórico de ideias:", error);
+    res.status(500).json({ error: "Erro ao buscar histórico de ideias." });
   }
 });
 

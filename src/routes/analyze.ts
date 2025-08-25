@@ -79,8 +79,12 @@ router.post("/", async (req, res) => {
 
     await prisma.idea.create({
       data: {
-        content: idea,
-        feedback: JSON.parse(JSON.stringify(mappedAnalysis)),
+        viability: mappedAnalysis.viability,
+        marketPotential: mappedAnalysis.marketPotential,
+        innovation: mappedAnalysis.innovation,
+        challenges: mappedAnalysis.challenges,
+        suggestions: mappedAnalysis.suggestions,
+        idea,
         userId: user.id,
       },
     });

@@ -43,11 +43,15 @@ model Organization {
 }
 
 model Idea {
-  id       String @id @default(cuid())
-  content  String
-  feedback Json?
-  user     User   @relation(fields: [userId], references: [id])
-  userId   String
+  id              String @id @default(cuid())
+  viability       String @db.Text
+  marketPotential String @db.Text
+  innovation      String @db.Text
+  challenges      String @db.Text
+  suggestions     String @db.Text
+  idea            String @db.Text
+  user            User   @relation(fields: [userId], references: [id])
+  userId          String
 
   createdAt DateTime @default(now())
 }
