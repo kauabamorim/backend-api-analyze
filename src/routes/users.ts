@@ -5,6 +5,22 @@ import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { analyzeIdeasMap } from "../mappers/analyzeIdeasMapper";
 
+import { rateLimit } from "express-rate-limit";
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message:
+    "Você excedeu o limite de tentativas de login. Tente novamente mais tarde.",
+});
+
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message:
+    "Você excedeu o limite de tentativas de registro. Tente novamente mais tarde.",
+});
+
 const prisma = new PrismaClient();
 const router = Router();
 
@@ -22,7 +38,7 @@ const loginSchema = z.object({
   password: z.string().min(1, "A senha é obrigatória."),
 });
 
-router.post("/register", async (req, res) => {
+router.post("/register", registerLimiter, async (req, res) => {
   const parseResult = registerSchema.safeParse(req.body);
 
   if (!parseResult.success) {
@@ -54,6 +70,7 @@ router.post("/register", async (req, res) => {
       },
     });
 
+    console.log(`Usuário ${email} registrado com sucesso.`);
     res.status(201).json({ message: "Usuário registrado com sucesso." });
   } catch (error) {
     console.error("Erro ao registrar usuário:", error);
@@ -61,7 +78,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", loginLimiter, async (req, res) => {
   const parseResult = loginSchema.safeParse(req.body);
 
   if (!parseResult.success) {
@@ -95,6 +112,7 @@ router.post("/login", async (req, res) => {
       }
     );
 
+    console.log(`Usuário ${user.id} logado com sucesso.`);
     res.json({ token });
   } catch (error) {
     console.error("Erro ao fazer login:", error);
