@@ -3,8 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
-import { analyzeIdeasMap } from "../mappers/analyzeIdeasMapper";
-
+import { analyzeIdeasMap } from "../mappers/analyzeMapper";
 import { rateLimit } from "express-rate-limit";
 
 const loginLimiter = rateLimit({

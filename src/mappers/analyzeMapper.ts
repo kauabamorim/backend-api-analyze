@@ -7,6 +7,19 @@ export interface IdeaEvaluation {
   fullText: string;
 }
 
+export interface AnalyzeIdea {
+  author: string;
+  id: string;
+  viability: string;
+  marketPotential: string;
+  innovation: string;
+  challenges: string;
+  suggestions: string;
+  idea: string;
+  status: string;
+  createdAt: Date;
+}
+
 export function analizeMap(text: string): IdeaEvaluation {
   const getSection = (label: string) => {
     const regex = new RegExp(`${label}:\\s*(.*?)\\s*(?=\\d+\\.|$)`, "si");
@@ -23,3 +36,18 @@ export function analizeMap(text: string): IdeaEvaluation {
     fullText: text.trim(),
   };
 }
+
+export const analyzeIdeasMap = (data: any): AnalyzeIdea => {
+  return {
+    author: data.author,
+    id: data.id,
+    viability: data.viability,
+    marketPotential: data.marketPotential,
+    innovation: data.innovation,
+    challenges: data.challenges,
+    suggestions: data.suggestions,
+    idea: data.idea,
+    status: data.status,
+    createdAt: data.createdAt,
+  };
+};

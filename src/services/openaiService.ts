@@ -23,7 +23,5 @@ Ideia: """${idea}"""
     input: prompt,
   });
 
-  console.log("Resposta da OpenAI:", response?.output_text?.trim());
-
   return response?.output_text?.trim() || "Sem resposta";
 }

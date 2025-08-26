@@ -1,6 +1,6 @@
 import express from "express";
 import { analyzeIdeaWithAI } from "../services/openaiService";
-import { analizeMap } from "../mappers/analyzeMapper";
+import { analizeMap, analyzeIdeasMap } from "../mappers/analyzeMapper";
 import z from "zod";
 import { Plan, PrismaClient } from "@prisma/client";
 
@@ -17,6 +17,8 @@ const limits = {
 const analyzeSchema = z.object({
   idea: z.string().min(1, "Idea é obrigatória."),
 });
+
+const idSchema = z.string().min(1, "ID é obrigatório.");
 
 router.post("/", async (req, res) => {
   const parseResult = analyzeSchema.safeParse(req.body);
@@ -113,6 +115,44 @@ router.post("/", async (req, res) => {
         },
       });
     }
+    res.status(500).json({ error: "Falha ao analisar a ideia." });
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+
+  const parseResult = idSchema.safeParse(id);
+
+  if (!parseResult.success) {
+    return res.status(400).json({
+      error: "ID inválido.",
+      issues: parseResult.error.errors,
+    });
+  }
+
+  const userId = req.user?.id;
+
+  if (!userId) {
+    return res.status(401).json({ error: "Usuário não autenticado." });
+  }
+
+  try {
+    const idea = await prisma.idea.findUnique({
+      where: { id },
+    });
+
+    if (!idea) {
+      return res.status(404).json({ error: "Ideia não encontrada." });
+    }
+
+    if (idea.userId !== userId) {
+      return res.status(403).json({ error: "Acesso negado a esta ideia." });
+    }
+
+    res.status(200).json(analyzeIdeasMap(idea));
+  } catch (error) {
+    console.error("Error analyzing ID idea:", error);
     res.status(500).json({ error: "Falha ao analisar a ideia." });
   }
 });

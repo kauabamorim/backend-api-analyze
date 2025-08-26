@@ -22,6 +22,7 @@ app.use(
 
 app.use(express.json());
 
+app.use("/api/analyze/:id", authenticateToken, analyzeRouter);
 app.use("/api/analyze", authenticateToken, analyzeRouter);
 app.use("/api/user/history", authenticateToken, userRoutes);
 app.use("/api/user", userRoutes);
