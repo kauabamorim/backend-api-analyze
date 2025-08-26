@@ -8,6 +8,7 @@ export interface AnalyzeIdea {
   suggestions: string;
   idea: string;
   status: string;
+  createdAt: Date;
 }
 
 export const analyzeIdeasMap = (data: any): AnalyzeIdea => {
@@ -21,5 +22,6 @@ export const analyzeIdeasMap = (data: any): AnalyzeIdea => {
     suggestions: data.suggestions,
     idea: data.idea,
     status: data.status,
+    createdAt: data.createdAt,
   };
 };
