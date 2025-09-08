@@ -39,6 +39,23 @@ describe("Register Route", () => {
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("error", "Usuário já existe.");
   });
+
+  it("should return 500 if an unexpected error occurs during register", async () => {
+    const spy = jest.spyOn(prisma.user, "findUnique").mockImplementation(() => {
+      throw new Error("DB error");
+    });
+
+    const response = await request(app).post("/api/user/register").send({
+      firstName: "Test",
+      lastName: "User",
+      email: "testuser@example.com",
+      password: "testingpassword321",
+    });
+
+    expect(response.status).toBe(500);
+    expect(response.body).toHaveProperty("error", "Erro ao registrar usuário.");
+    spy.mockRestore();
+  });
 });
 
 describe("Login Route", () => {
@@ -82,7 +99,7 @@ describe("Login Route", () => {
   });
 
   it("should return 500 if an unexpected error occurs during login", async () => {
-    jest.spyOn(prisma.user, "findUnique").mockImplementation(() => {
+    const spy = jest.spyOn(prisma.user, "findUnique").mockImplementation(() => {
       throw new Error("DB error");
     });
 
@@ -93,5 +110,6 @@ describe("Login Route", () => {
 
     expect(response.status).toBe(500);
     expect(response.body).toHaveProperty("error", "Erro ao fazer login.");
+    spy.mockRestore();
   });
 });

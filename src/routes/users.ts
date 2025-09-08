@@ -45,20 +45,19 @@ router.post("/register", registerLimiter, async (req, res) => {
       .status(400)
       .json({ error: "Dados inválidos.", issues: parseResult.error.errors });
   }
-
-  const { email, password, firstName, lastName } = parseResult.data;
-
-  const name = `${firstName} ${lastName}`;
-
-  const checkExistUser = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  if (checkExistUser) {
-    return res.status(400).json({ error: "Usuário já existe." });
-  }
-
   try {
+    const { email, password, firstName, lastName } = parseResult.data;
+
+    const name = `${firstName} ${lastName}`;
+
+    const checkExistUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (checkExistUser) {
+      return res.status(400).json({ error: "Usuário já existe." });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await prisma.user.create({
