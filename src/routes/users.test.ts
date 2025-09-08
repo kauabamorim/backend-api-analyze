@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import request from "supertest";
 import app from "../app";
-import { PrismaClient } from "@prisma/client";
 import prisma from "../lib/prisma";
 
 afterAll(async () => {
