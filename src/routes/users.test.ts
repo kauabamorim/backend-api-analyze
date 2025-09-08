@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken";
 import request from "supertest";
 import app from "../app";
 import { PrismaClient } from "@prisma/client";
@@ -115,5 +116,103 @@ describe("Login Route", () => {
     expect(response.status).toBe(500);
     expect(response.body).toHaveProperty("error", "Erro ao fazer login.");
     spy.mockRestore();
+  });
+});
+
+jest.mock("../mappers/analyzeMapper.ts", () => ({
+  analyzeIdeasMap: jest.fn((idea) => ({ ...idea, mapped: true })),
+}));
+
+describe("History Route", () => {
+  const token = "fake-jwt-token";
+
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("should return 401 if token is not provided", async () => {
+    const res = await request(app).get("/api/user/history");
+    expect(res.status).toBe(401);
+    expect(res.body).toEqual({ error: "Token não fornecido" });
+  });
+
+  it("should return empty array if user has no ideas", async () => {
+    jest.spyOn(jwt, "verify").mockImplementation((t, secret, cb: any) =>
+      cb(null, {
+        id: "user123",
+        email: "test@example.com",
+        plan: "FREE",
+        name: "Test User",
+      })
+    );
+
+    jest.spyOn(prisma.idea, "findMany").mockResolvedValue([]);
+
+    const res = await request(app)
+      .get("/api/user/history")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual([]);
+  });
+
+  it("should return mapped ideas for authenticated user", async () => {
+    jest.spyOn(jwt, "verify").mockImplementation((t, secret, cb: any) =>
+      cb(null, {
+        id: "user123",
+        email: "test@example.com",
+        plan: "FREE",
+        name: "Test User",
+      })
+    );
+
+    const ideasMock = [
+      {
+        id: "1",
+        idea: "Idea 1",
+        createdAt: new Date().toISOString(),
+        userId: "user123",
+      },
+      {
+        id: "2",
+        idea: "Idea 2",
+        createdAt: new Date().toISOString(),
+        userId: "user123",
+      },
+    ];
+
+    jest.spyOn(prisma.idea, "findMany").mockResolvedValue(ideasMock as any);
+
+    const res = await request(app)
+      .get("/api/user/history")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual([
+      { ...ideasMock[0], mapped: true },
+      { ...ideasMock[1], mapped: true },
+    ]);
+  });
+
+  it("should return 500 if prisma throws error", async () => {
+    jest.spyOn(jwt, "verify").mockImplementation((t, secret, cb: any) =>
+      cb(null, {
+        id: "user123",
+        email: "test@example.com",
+        plan: "FREE",
+        name: "Test User",
+      })
+    );
+
+    jest
+      .spyOn(prisma.idea, "findMany")
+      .mockRejectedValue(new Error("DB error"));
+
+    const res = await request(app)
+      .get("/api/user/history")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(500);
+    expect(res.body).toEqual({ error: "Erro ao buscar histórico de ideias." });
   });
 });
