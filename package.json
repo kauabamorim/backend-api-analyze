@@ -19,7 +19,7 @@
   },
   "scripts": {
     "dev": "ts-node src/app.ts",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "start": "node dist/app.js",
     "test": "jest"
   },
