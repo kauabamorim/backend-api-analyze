@@ -3,6 +3,10 @@ import app from "../app";
 import { PrismaClient } from "@prisma/client";
 import prisma from "../lib/prisma";
 
+afterAll(async () => {
+  await prisma.user.deleteMany({ where: { email: "testuser@example.com" } });
+});
+
 describe("Register Route", () => {
   it("should register a new user successfully", async () => {
     const response = await request(app).post("/api/user/register").send({
