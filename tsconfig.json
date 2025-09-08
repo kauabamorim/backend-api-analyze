@@ -6,7 +6,8 @@
     "outDir": "dist",
     "strict": true,
     "esModuleInterop": true,
-    "types": ["node", "jest"],
+    "types": ["node", "jest", "express"],
     "typeRoots": ["./@types", "./node_modules/@types"]
-  }
+  },
+  "include": ["src", "@types"]
 }
