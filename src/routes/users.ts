@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { analyzeIdeasMap } from "../mappers/analyzeMapper";
 import { rateLimit } from "express-rate-limit";
+import prisma from "../lib/prisma";
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -20,7 +21,6 @@ const registerLimiter = rateLimit({
     "Você excedeu o limite de tentativas de registro. Tente novamente mais tarde.",
 });
 
-const prisma = new PrismaClient();
 const router = Router();
 
 const JWT_SECRET = process.env.NEXT_PUBLIC_JWT_SECRET || "";

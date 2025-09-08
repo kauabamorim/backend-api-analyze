@@ -3,8 +3,8 @@ import { analyzeIdeaWithAI } from "../services/openaiService";
 import { analizeMap, analyzeIdeasMap } from "../mappers/analyzeMapper";
 import z from "zod";
 import { Plan, PrismaClient } from "@prisma/client";
+import prisma from "../lib/prisma";
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 const limits = {

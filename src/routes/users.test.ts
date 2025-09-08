@@ -1,5 +1,7 @@
 import request from "supertest";
 import app from "../app";
+import { PrismaClient } from "@prisma/client";
+import prisma from "../lib/prisma";
 
 describe("Register Route", () => {
   it("should register a new user successfully", async () => {
@@ -77,5 +79,19 @@ describe("Login Route", () => {
 
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("error", "Dados inválidos.");
+  });
+
+  it("should return 500 if an unexpected error occurs during login", async () => {
+    jest.spyOn(prisma.user, "findUnique").mockImplementation(() => {
+      throw new Error("DB error");
+    });
+
+    const response = await request(app).post("/api/user/login").send({
+      email: "testuser@example.com",
+      password: "testingpassword321",
+    });
+
+    expect(response.status).toBe(500);
+    expect(response.body).toHaveProperty("error", "Erro ao fazer login.");
   });
 });
