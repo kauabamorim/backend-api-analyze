@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
-const JWT_SECRET = process.env.JWT_SECRET || "";
+const JWT_SECRET = process.env.NEXT_PUBLIC_JWT_SECRET || "";
 
 const JwtPayloadSchema = z.object({
   id: z.string(),

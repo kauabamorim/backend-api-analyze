@@ -23,7 +23,7 @@ const registerLimiter = rateLimit({
 const prisma = new PrismaClient();
 const router = Router();
 
-const JWT_SECRET = process.env.JWT_SECRET || "";
+const JWT_SECRET = process.env.NEXT_PUBLIC_JWT_SECRET || "";
 
 const registerSchema = z.object({
   email: z.string().email("Email inválido."),

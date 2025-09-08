@@ -27,6 +27,10 @@ app.use("/api/analyze", authenticateToken, analyzeRouter);
 app.use("/api/user/history", authenticateToken, userRoutes);
 app.use("/api/user", userRoutes);
 
-app.listen(port, "0.0.0.0", () => {
-  console.log(`Servidor rodando em http://0.0.0.0:${port}`);
-});
+if (require.main === module) {
+  app.listen(port, "0.0.0.0", () => {
+    console.log(`Servidor rodando em http://0.0.0.0:${port}`);
+  });
+}
+
+export default app;
