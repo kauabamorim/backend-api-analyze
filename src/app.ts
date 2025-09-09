@@ -14,7 +14,7 @@ app.get("/", (req: Request, res: Response) => {
 
 app.use(
   cors({
-    origin: "http://localhost:8080",
+    origin: ["http://localhost:8080", "https://main.d26xybtyw6zs59.amplifyapp.com"],
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
